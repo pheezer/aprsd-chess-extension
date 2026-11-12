@@ -39,6 +39,43 @@ server_opts = [
         "message addressed to this server is delivered. Any existing filter "
         "is kept.",
     ),
+    cfg.BoolOpt(
+        "beacon_enabled",
+        default=False,
+        help="Send a position beacon so the chess server shows up on APRS maps. "
+        "Turn off [DEFAULT] enable_beacon too, or the station beacons twice.",
+    ),
+    cfg.StrOpt(
+        "beacon_comment",
+        default="APRS Chess",
+        help="Text shown with the beacon on the map.",
+    ),
+    cfg.StrOpt(
+        "beacon_symbol",
+        default="e",
+        help="APRS symbol character. With the primary table (/), e is a horse.",
+    ),
+    cfg.StrOpt(
+        "beacon_symbol_table",
+        default="/",
+        help="APRS symbol table: / (primary) or \\ (alternate).",
+    ),
+    cfg.FloatOpt(
+        "beacon_latitude",
+        default=None,
+        help="Beacon latitude in decimal degrees. Defaults to [DEFAULT] latitude.",
+    ),
+    cfg.FloatOpt(
+        "beacon_longitude",
+        default=None,
+        help="Beacon longitude in decimal degrees. Defaults to [DEFAULT] longitude.",
+    ),
+    cfg.IntOpt(
+        "beacon_interval",
+        default=1800,
+        min=60,
+        help="Seconds between beacons. The first one goes out at startup.",
+    ),
 ]
 
 client_group = cfg.OptGroup(
@@ -51,7 +88,7 @@ client_opts = [
         "server_callsign",
         default=None,
         help="Callsign of the APRSD station running the chess server plugin, "
-        "e.g. KK6SPK-12. Required.",
+        "e.g. KK6SPK-4. Required.",
     ),
     cfg.StrOpt(
         "player_callsign",

@@ -74,7 +74,7 @@ aprsd 4.1.2 and newer), and enable the plugin::
 .. code-block:: ini
 
     [DEFAULT]
-    callsign = KK6SPK-12
+    callsign = KK6SPK-4
     enabled_plugins = aprsd_chess_extension.plugin.ChessPlugin
 
     [aprsd_chess]
@@ -85,10 +85,23 @@ aprsd 4.1.2 and newer), and enable the plugin::
     # data_file = <save_location>/aprsd_chess_games.json
     aprsis_filter = true
 
+    # Map beacon, off by default: a horse (/e) labeled "APRS Chess".
+    beacon_enabled = false
+    beacon_comment = APRS Chess
+    beacon_symbol_table = /
+    beacon_symbol = e
+    # beacon_latitude / beacon_longitude default to [DEFAULT] latitude / longitude
+    beacon_interval = 1800
+
 The plugin answers messages that start with ``chess``. No built-in aprsd
 plugin starts with "c", so they don't answer as well. On APRS-IS, the plugin
 adds a ``g/<callsign>`` filter so every message addressed to the server
 reaches it. Games are saved after every change, written atomically.
+
+With ``beacon_enabled = true`` the server sends a position report when it
+starts and every ``beacon_interval`` seconds after that, so it shows up on
+maps such as aprs.fi. Set ``[DEFAULT] enable_beacon = false`` as well;
+otherwise aprsd's built-in beacon, labeled "APRSD GPS Beacon", goes out too.
 
 ``radio-service/aprsd-chess`` in the vinnward-cluster repository runs this
 plugin on k3s.
@@ -116,7 +129,7 @@ Over APRS-IS (internet, no radio)
     password = <your APRS-IS passcode>
 
     [aprsd_chess_client]
-    server_callsign = KK6SPK-12
+    server_callsign = KK6SPK-4
 
 APRS-IS needs your passcode before it will forward your messages. The client
 checks the passcode and login when it starts and says what's wrong.
@@ -177,7 +190,7 @@ On a DigiPi
 
 On the DigiPi, as the ``pi`` user, from a checkout of this repository::
 
-    ./digipi/install.sh --server KK6SPK-12            # --ssid 6 --port 8056 --transport kiss
+    ./digipi/install.sh --server KK6SPK-4            # --ssid 6 --port 8056 --transport kiss
 
 This installs into WebChat's venv without upgrading WebChat's packages. It
 writes ``chess.conf`` using your DigiPi callsign with SSID ``-6``, adds a

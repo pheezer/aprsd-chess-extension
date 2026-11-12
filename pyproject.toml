@@ -1,6 +1,6 @@
 [project]
 name = "aprsd-chess-extension"
-description = "Play chess over APRS: an APRSD game-server plugin plus a web chessboard client"
+description = "Play chess over APRS: an APRSD game-server plugin plus terminal and web chessboard clients"
 requires-python = ">=3.11"
 dynamic = ["version", "dependencies", "optional-dependencies"]
 readme = {file = "README.rst", content-type = "text/x-rst"}

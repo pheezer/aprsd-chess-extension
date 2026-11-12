@@ -1,7 +1,7 @@
 #!/bin/bash
 # Install the APRS Chess web board on a DigiPi, beside WebChat.
 #
-#   ./install.sh --server KK6SPK-12 [--ssid 6] [--port 8056] [--transport kiss|aprsis]
+#   ./install.sh --server KK6SPK-4 [--ssid 6] [--port 8056] [--transport kiss|aprsis]
 #
 # Run it on the DigiPi, as the pi user, from a checkout of this repository.
 # It remounts the filesystem read-write; reboot afterwards to make it

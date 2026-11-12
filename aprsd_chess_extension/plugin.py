@@ -12,6 +12,7 @@ from oslo_config import cfg
 
 import aprsd_chess_extension
 from aprsd_chess_extension import (
+    beacon,
     compat,
     conf,  # noqa: F401  (registers options)
     protocol,
@@ -111,9 +112,19 @@ class ChessPlugin(plugin.APRSDRegexCommandPluginBase):
         self.enabled = True
 
     def create_threads(self):
-        if self.enabled and self.server:
-            return [ChessExpiryThread(self.server)]
-        return []
+        if not (self.enabled and self.server):
+            return []
+        created = [ChessExpiryThread(self.server)]
+        if CONF.aprsd_chess.beacon_enabled:
+            position = beacon.beacon_settings()
+            if position:
+                created.append(beacon.ChessBeaconThread(*position))
+            else:
+                LOG.warning(
+                    "Chess: beacon_enabled but no position; set "
+                    "[aprsd_chess] beacon_latitude and beacon_longitude"
+                )
+        return created
 
     def help(self):
         return list(protocol.HELP_LINES)
