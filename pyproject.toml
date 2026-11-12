@@ -1,0 +1,91 @@
+[project]
+name = "aprsd-chess-extension"
+description = "Play chess over APRS: an APRSD game-server plugin plus a web chessboard client"
+requires-python = ">=3.11"
+dynamic = ["version", "dependencies", "optional-dependencies"]
+readme = {file = "README.rst", content-type = "text/x-rst"}
+license = {file = "LICENSE"}
+authors = [
+    {name = "Philip Duvall", email = "phil@vinnward.net"},
+]
+maintainers = [
+    {name = "Philip Duvall", email = "phil@vinnward.net"},
+]
+keywords = [
+    "aprs",
+    "aprs-is",
+    "aprsd",
+    "chess",
+    "digipi",
+    "ham radio",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Environment :: Web Environment",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Topic :: Communications :: Ham Radio",
+    "Topic :: Games/Entertainment :: Board Games",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["./requirements.txt"]}
+optional-dependencies.dev = {file = ["./requirements-dev.txt"]}
+
+[project.urls]
+"Source" = "https://github.com/pheezer/aprsd-chess-extension"
+"Bug Reports" = "https://github.com/pheezer/aprsd-chess-extension/issues"
+
+# `aprsd chess` -- aprsd imports this module at startup, which attaches the
+# command to aprsd's click group.
+[project.entry-points."aprsd.extension"]
+    "chess" = "aprsd_chess_extension.extension"
+
+# The entry name must contain "aprsd" for `aprsd sample-config` to include it.
+[project.entry-points."oslo.config.opts"]
+    "aprsd_chess_extension.conf" = "aprsd_chess_extension.conf.opts:list_opts"
+
+[tool.setuptools.packages.find]
+include = ["aprsd_chess_extension*"]
+
+# The web client's template and static assets (incl. vendored chessground).
+[tool.setuptools.package-data]
+"aprsd_chess_extension" = [
+    "web/templates/*.html",
+    "web/static/css/*",
+    "web/static/js/*",
+    "web/static/vendor/chessground/*",
+]
+
+[build-system]
+requires = [
+    "setuptools>=69.5.0",
+    "setuptools_scm>=8",
+    "wheel",
+]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+fallback_version = "0.0.0"
+
+[tool.ruff]
+line-length = 88
+extend-exclude = ["aprsd_chess_extension/web/static/vendor"]
+
+[tool.ruff.lint]
+select = ["F", "E", "W", "B", "I"]
+ignore = ["E501"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true

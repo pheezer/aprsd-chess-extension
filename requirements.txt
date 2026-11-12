@@ -1,0 +1,4 @@
+aprsd>=4.1.2
+chess>=1.10,<2
+flask>=2.2
+oslo.config

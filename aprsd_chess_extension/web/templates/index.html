@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }}</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/chessground/chessground.base.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/chessground/chessground.brown.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/chessground/chessground.cburnett.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <h1>{{ title }}</h1>
+    <div class="station">
+      Playing as <strong id="player">{{ player }}</strong>
+      &middot; server <strong>{{ server }}</strong>
+      <span id="conn" class="conn" title="Connection to this page's server">&#9679;</span>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="sidebar">
+      <div class="card">
+        <h2>New game</h2>
+        <form id="new-form" autocomplete="off">
+          <label>Your callsign
+            <input id="mycall" name="mycall" value="{{ player }}" spellcheck="false" autocapitalize="characters">
+          </label>
+          <label>Opponent's callsign-SSID
+            <input id="theircall" name="theircall" placeholder="e.g. W1AW-7" spellcheck="false" autocapitalize="characters">
+          </label>
+          <p class="hint">Use the exact SSID your opponent's radio receives on. You play White.</p>
+          <button type="submit">Start game</button>
+          <p id="new-status" class="status-line" aria-live="polite"></p>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Resume</h2>
+        <form id="resume-form" autocomplete="off">
+          <label>Game code
+            <input id="code" name="code" inputmode="numeric" pattern="\d{4}" maxlength="4" placeholder="4821">
+          </label>
+          <button type="submit">Load game</button>
+          <p id="resume-status" class="status-line" aria-live="polite"></p>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>My games</h2>
+          <button id="refresh-list" class="link" type="button" title="Ask the server for your games">Refresh</button>
+        </div>
+        <ul id="games" class="games"></ul>
+      </div>
+    </section>
+
+    <section class="board-area">
+      <div id="empty" class="empty">
+        <p>Start a game or load one with its code.</p>
+      </div>
+      <div id="game" class="game" hidden>
+        <div class="game-head">
+          <div>
+            <span id="game-code" class="code"></span>
+            <span id="game-title"></span>
+          </div>
+          <div id="game-status" class="game-status" aria-live="polite"></div>
+        </div>
+        <div class="board-wrap">
+          <div id="board" class="cg-wrap"></div>
+          <div id="promotion" class="promotion" hidden>
+            <p>Promote to</p>
+            <div class="promo-choices">
+              <button type="button" data-piece="q">Queen</button>
+              <button type="button" data-piece="r">Rook</button>
+              <button type="button" data-piece="b">Bishop</button>
+              <button type="button" data-piece="n">Knight</button>
+            </div>
+            <button type="button" class="link" data-piece="">Cancel</button>
+          </div>
+        </div>
+        <div class="actions">
+          <button id="btn-resync" type="button" title="Ask the server for the current position">Resync</button>
+          <button id="btn-retry" type="button" hidden>Retry</button>
+          <button id="btn-draw" type="button">Offer draw</button>
+          <button id="btn-resign" type="button" class="danger">Resign</button>
+          <button id="btn-forget" type="button" class="link" hidden>Remove from list</button>
+        </div>
+        <ol id="moves" class="moves"></ol>
+      </div>
+
+      <details class="card log-card">
+        <summary>APRS traffic</summary>
+        <ul id="log" class="log"></ul>
+      </details>
+    </section>
+  </main>
+
+  <script type="module" src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

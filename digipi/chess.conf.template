@@ -1,0 +1,30 @@
+# aprsd chess client config, written by aprsd-chess-extension's install.sh.
+# Edit and re-save with DigiPi's "Save Configuration" (or copy it to
+# /home/pi/config/aprsd/chess.conf), since ~/.config is tmpfs.
+
+[DEFAULT]
+# The chess client gets its own SSID so it can run beside WebChat.
+callsign = @CALLSIGN@
+owner_callsign = @BASECALL@
+is_digipi = true
+enable_beacon = false
+enable_save = false
+# Keep the client's files away from WebChat's.
+save_location = /home/pi/.config/aprsd/chess/
+default_ack_send_count = 2
+packet_dupe_timeout = 700
+
+[aprs_network]
+enabled = @APRSIS_ENABLED@
+password = @APRSIS_PASSWORD@
+
+[kiss_tcp]
+enabled = @KISS_ENABLED@
+host = localhost
+port = 8001
+
+[aprsd_chess_client]
+# The station running the chess server plugin.
+server_callsign = @SERVER@
+web_ip = 0.0.0.0
+web_port = @PORT@
