@@ -51,16 +51,28 @@ echo "== Remounting the filesystem read-write"
 sudo remount
 
 echo "== Installing aprsd-chess-extension into $VENV"
-# Pin what WebChat already uses so this install never upgrades it.
+# Constrain the install to exactly what's already in the venv, so WebChat's
+# packages are never upgraded or replaced. This also matters for resolving:
+# DigiPi's aprsd 5.0.0 comes from git and pins aprslib to a git commit, and
+# uv only accepts such a URL dependency when it's listed explicitly, which a
+# full freeze does. (DigiPi's venv is made by uv and has no pip, so use uv's
+# freeze when uv is available.)
 CONSTRAINTS="$(mktemp)"
-"$VENV/bin/python" -m pip freeze 2>/dev/null | grep -i -E '^(aprsd|flask|werkzeug|click|oslo[._-]config)==' > "$CONSTRAINTS" || true
-if command -v uv >/dev/null 2>&1 || [ -x /home/pi/.local/bin/uv ]; then
-  UV="$(command -v uv || echo /home/pi/.local/bin/uv)"
+trap 'rm -f "$CONSTRAINTS"' EXIT
+UV=""
+if command -v uv >/dev/null 2>&1; then
+  UV="$(command -v uv)"
+elif [ -x /home/pi/.local/bin/uv ]; then
+  UV=/home/pi/.local/bin/uv
+fi
+if [ -n "$UV" ]; then
+  "$UV" pip freeze --python "$VENV/bin/python" > "$CONSTRAINTS"
   "$UV" pip install --python "$VENV/bin/python" -c "$CONSTRAINTS" "$REPO"
 else
+  "$VENV/bin/python" -m pip freeze > "$CONSTRAINTS"
   "$VENV/bin/python" -m pip install -c "$CONSTRAINTS" "$REPO"
 fi
-rm -f "$CONSTRAINTS"
+"$VENV/bin/aprsd" chess --help >/dev/null || { echo "aprsd chess didn't install correctly"; exit 1; }
 
 echo "== Writing chess.conf for $CALLSIGN (server $SERVER, $TRANSPORT)"
 if [ "$TRANSPORT" = kiss ]; then
