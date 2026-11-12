@@ -49,6 +49,7 @@ class ClientGameManager:
         # The last failed resume-by-code, shown next to the Resume box.
         self.resume_error: dict | None = None
         self.log: list[dict] = []
+        self._log_seq = 0
         self._subscribers: list[queue.Queue] = []
         self._load_cache()
 
@@ -195,10 +196,11 @@ class ClientGameManager:
         if protocol.normalize_call(from_call) != self.server_callsign:
             self._log("rx-other", f"{from_call}: {text}")
             return
-        self._log("rx", text)
         reply = protocol.parse_reply(text)
         need_sync = []
         with self.lock:
+            # Log and apply together, so nobody sees the message before its effect.
+            self._log("rx", text)
             handler = getattr(self, f"_on_{reply.kind}", None)
             if handler:
                 need_sync = handler(reply) or []
@@ -554,7 +556,15 @@ class ClientGameManager:
 
     def _log(self, direction: str, text: str) -> None:
         with self.lock:
-            self.log.append({"t": int(self.clock()), "dir": direction, "text": text})
+            self._log_seq += 1
+            self.log.append(
+                {
+                    "seq": self._log_seq,
+                    "t": int(self.clock()),
+                    "dir": direction,
+                    "text": text,
+                }
+            )
             del self.log[:-MAX_LOG]
 
     # -- cache -----------------------------------------------------------

@@ -21,4 +21,4 @@ source ~/.aprsd-venv/bin/activate
 # For longer loglines in journalctl -fu chess output
 export COLUMNS=200
 
-exec aprsd chess -c "$CONF" --port @PORT@ --loglevel ERROR
+exec aprsd chess web -c "$CONF" --port @PORT@ --loglevel ERROR

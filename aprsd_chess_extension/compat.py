@@ -20,6 +20,19 @@ def get_client():
     return APRSDClient()
 
 
+def _value(attribute):
+    """aprsd 4.2.x exposes some client state as properties, 5.x as methods."""
+    return attribute() if callable(attribute) else attribute
+
+
+def login_success(client) -> bool:
+    return bool(_value(getattr(client, "login_success", False)))
+
+
+def login_failure(client) -> str | None:
+    return _value(getattr(client, "login_failure", None))
+
+
 def get_transport(client) -> str | None:
     driver = getattr(client, "driver", None)  # aprsd >= 4.2
     source = driver if driver is not None else client

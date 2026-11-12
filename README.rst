@@ -7,8 +7,13 @@ Play chess over APRS radio.
 * **Server:** an `APRSD <https://github.com/craigerl/aprsd>`_ plugin that hosts
   games between callsigns. Each game has a 4-digit code that either player can
   use to reattach, and a game is deleted after 10 days with no activity.
-* **Client:** ``aprsd chess``, a graphical web chessboard. On a
-  `DigiPi <https://digipi.org>`_ it sits next to APRS WebChat as its own toggle.
+* **Clients:**
+
+  * ``aprsd chess play`` runs in a terminal.
+  * ``aprsd chess web`` is a graphical web chessboard. On a
+    `DigiPi <https://digipi.org>`_ it sits next to APRS WebChat as its own toggle.
+
+  Both connect straight to APRS-IS, or to a radio through a KISS TNC.
 
 The whole board fits in one APRS message, so a client that has lost
 everything can resume a game from its code with one short exchange: about 2.3
@@ -88,29 +93,81 @@ reaches it. Games are saved after every change, written atomically.
 ``radio-service/aprsd-chess`` in the vinnward-cluster repository runs this
 plugin on k3s.
 
-Running the web client
-======================
+Running a client
+================
 
-``aprsd chess`` needs aprsd 4.2 or newer. Give it its own callsign or SSID,
-not the server's, and point it at the server:
+The clients need aprsd 4.2 or newer. ``pip install aprsd`` gives you 4.2.4,
+and both clients are tested on 4.2.4 and 5.x. Give the client its own callsign
+or SSID, not the server's, and point it at the server.
+
+Over APRS-IS (internet, no radio)
+---------------------------------
 
 .. code-block:: ini
 
     [DEFAULT]
     callsign = KK6SPK-6
+    owner_callsign = KK6SPK
+
+    [aprs_network]
+    enabled = true
+    # aprsd 4.x logs in as `login`; it must be the same as callsign above.
+    login = KK6SPK-6
+    password = <your APRS-IS passcode>
 
     [aprsd_chess_client]
     server_callsign = KK6SPK-12
-    # player_callsign defaults to the base of [DEFAULT] callsign
-    web_port = 8056
 
-Then run ``aprsd chess -c chess.conf`` and open ``http://localhost:8056/``.
+APRS-IS needs your passcode before it will forward your messages. The client
+checks the passcode and login when it starts and says what's wrong.
+
+Over a radio (KISS TNC)
+-----------------------
+
+Use ``[aprs_network] enabled = false`` and ``[kiss_tcp]`` (direwolf's
+``localhost:8001``) or ``[kiss_serial]`` instead.
+
+In the terminal
+---------------
+
+::
+
+    aprsd chess play -c chess.conf
+
+You get a text board and a ``chess>`` prompt::
+
+    chess> new W1AW-7          start a game (you're White)
+    chess> e4                  play a move: e4 Nf3 O-O exd5 e8=Q g1f3
+    chess> load 4821           resume a game from its code
+    chess> games               your games; play <code> switches between them
+    chess> help
+
+Your opponent's moves are printed as they arrive, and the board is redrawn.
+The line you're typing is kept underneath. The board is drawn from your side,
+in color, with chess symbols. Use ``--ascii`` for letters and ``--no-color``
+for plain text.
+
+The APRS messages going back and forth are shown as ``>>`` (sent) and ``<<``
+(received). Type ``traffic`` to hide them. aprsd's own log goes to
+``aprsd_chess_terminal.log`` in ``save_location``, or use ``--show-logs`` to
+see it in the terminal.
+
+In a browser
+------------
+
+::
+
+    aprsd chess web -c chess.conf        # then open http://localhost:8056/
+
+Plain ``aprsd chess`` does the same. ``web_port`` in ``[aprsd_chess_client]``
+sets the port.
 
 * **Start a game** with your callsign and your opponent's callsign-SSID.
 * **Resume** a game by entering its code. The board comes back from a single
   state message.
 * Moves you make show as "sent" until the server confirms them. If the server
-  never answers, a **Retry** button appears. A retry is never played twice.
+  never answers, a **Retry** button appears (``retry`` in the terminal). A
+  retry is never played twice.
 
 The board is `chessground <https://github.com/lichess-org/chessground>`_,
 bundled so it works with no internet connection.
@@ -173,7 +230,8 @@ Development
 
     uv venv && uv pip install -e ".[dev]"
     .venv/bin/pytest
-    tox -e aprsd412   # the plugin on aprsd 4.1.2 / Python 3.11 (the cluster image)
+    tox -e aprsd412   # aprsd 4.1.2 / Python 3.11: the cluster image
+    tox -e aprsd424   # aprsd 4.2.4: the current PyPI release
 
 ``tools/kiss_hub.py`` is a fake radio channel for end-to-end tests without
 transmitting. Point several aprsd instances' ``[kiss_tcp]`` at it. With

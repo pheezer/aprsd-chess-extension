@@ -23,7 +23,10 @@ import threading
 import time
 
 FEND = 0xC0
-MIN_GAP = 0.05
+# Spacing between frames in instant mode.  aprsd 5.x reads one frame per TCP
+# read (aprsd/client/drivers/tcpkiss.py read_frame), so frames that arrive
+# together get merged into one garbled packet.
+MIN_GAP = 0.3
 FESC = 0xDB
 TFEND = 0xDC
 TFESC = 0xDD
