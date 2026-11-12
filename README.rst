@@ -148,30 +148,74 @@ plugin on k3s.
 Running a client
 ================
 
-The clients need aprsd 4.2 or newer. ``pip install aprsd`` gives you 4.2.4,
-and both clients are tested on 4.2.4 and 5.x. Give the client its own callsign
-or SSID, not the server's, and point it at the server.
+Both clients come with this package: the ``aprsd chess play`` and
+``aprsd chess web`` commands are installed along with the server plugin.
+They need aprsd 4.2 or newer. ``pip install`` brings in aprsd 4.2.4 from PyPI,
+and both clients are tested on 4.2.4 and 5.x. Give the client its own
+callsign or SSID, not the server's, and point it at the server.
+
+Quick start: the terminal client over APRS-IS
+---------------------------------------------
+
+You need Python 3.11 or newer and an APRS-IS passcode for your callsign. No
+radio is needed.
+
+1. Install it into a virtualenv::
+
+       python3 -m venv ~/aprs-chess
+       ~/aprs-chess/bin/pip install git+https://github.com/pheezer/aprsd-chess-extension.git
+
+2. Save this as ``~/aprs-chess/chess.conf``, with your own callsign and passcode:
+
+   .. code-block:: ini
+
+       [DEFAULT]
+       callsign = KK6SPK-6
+       owner_callsign = KK6SPK
+       enable_save = false
+       enable_beacon = false
+
+       [aprs_network]
+       enabled = true
+       # aprsd 4.x logs in as `login`; it must be the same as callsign above.
+       login = KK6SPK-6
+       password = <your APRS-IS passcode>
+
+       [aprsd_chess_client]
+       server_callsign = KK6SPK-4
+
+   Pick an SSID that nothing else of yours uses, and never the server's. A
+   passcode depends only on the base callsign, so it works for every SSID.
+   APRS-IS only delivers replies to the callsign you log in as, which is why
+   ``login`` must match ``callsign``. The client checks the passcode and login
+   when it starts and says what's wrong.
+
+3. Start it::
+
+       ~/aprs-chess/bin/aprsd chess play -c ~/aprs-chess/chess.conf
+
+4. Start a game. At the ``chess>`` prompt, challenge your opponent's exact
+   callsign-SSID::
+
+       chess> new W1AW-7
+
+   The server replies with a 4-digit game code, and your opponent gets an
+   invite with the same code. You're White, so make the first move right
+   away, for example ``e4``. Your opponent sees the invite and joins with
+   ``play <code>`` in their client, or ``chess <code>`` from any APRS app,
+   and then replies with a move.
+
+5. To get back to a game later, from any SSID or a fresh install, use
+   ``load <code>``. The whole position comes back in one APRS message.
+
+To try it on your own, run a second copy with another config that uses a
+different SSID (for example ``-7``). Challenge it from the first window and
+answer from the second.
 
 Over APRS-IS (internet, no radio)
 ---------------------------------
 
-.. code-block:: ini
-
-    [DEFAULT]
-    callsign = KK6SPK-6
-    owner_callsign = KK6SPK
-
-    [aprs_network]
-    enabled = true
-    # aprsd 4.x logs in as `login`; it must be the same as callsign above.
-    login = KK6SPK-6
-    password = <your APRS-IS passcode>
-
-    [aprsd_chess_client]
-    server_callsign = KK6SPK-4
-
-APRS-IS needs your passcode before it will forward your messages. The client
-checks the passcode and login when it starts and says what's wrong.
+The quick start above uses APRS-IS. The web client below uses the same config.
 
 Over a radio (KISS TNC)
 -----------------------
