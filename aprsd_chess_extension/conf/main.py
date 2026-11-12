@@ -74,7 +74,48 @@ server_opts = [
         "beacon_interval",
         default=1800,
         min=60,
-        help="Seconds between beacons. The first one goes out at startup.",
+        help="Seconds between beacons (and object reports). The first one "
+        "goes out at startup.",
+    ),
+    cfg.BoolOpt(
+        "object_enabled",
+        default=False,
+        help="Put a named APRS object on the map (for example CHESS). An "
+        "object is a position report *about* something, sent by and owned by "
+        "this station's licensed callsign; the name is only a map label. "
+        "This is the proper way to show a name that isn't a callsign: never "
+        "log in or transmit as one.",
+    ),
+    cfg.StrOpt(
+        "object_name",
+        default="CHESS",
+        help="The object's name on the map: 1 to 9 printable characters.",
+    ),
+    cfg.StrOpt(
+        "object_comment",
+        default="APRS Chess: msg {callsign} chess help",
+        help="Text shown with the object. {callsign} becomes this station's "
+        "callsign, so people know who to message. At most 43 characters.",
+    ),
+    cfg.StrOpt(
+        "object_symbol",
+        default="e",
+        help="APRS symbol character for the object. With table /, e is a horse.",
+    ),
+    cfg.StrOpt(
+        "object_symbol_table",
+        default="/",
+        help="APRS symbol table for the object: / (primary) or \\ (alternate).",
+    ),
+    cfg.FloatOpt(
+        "object_latitude",
+        default=None,
+        help="Object latitude in decimal degrees. Defaults to the beacon position.",
+    ),
+    cfg.FloatOpt(
+        "object_longitude",
+        default=None,
+        help="Object longitude in decimal degrees. Defaults to the beacon position.",
     ),
 ]
 

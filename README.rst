@@ -93,6 +93,14 @@ aprsd 4.1.2 and newer), and enable the plugin::
     # beacon_latitude / beacon_longitude default to [DEFAULT] latitude / longitude
     beacon_interval = 1800
 
+    # Named map object, off by default: a horse labeled CHESS (see below).
+    object_enabled = false
+    object_name = CHESS
+    object_comment = APRS Chess: msg {callsign} chess help
+    object_symbol_table = /
+    object_symbol = e
+    # object_latitude / object_longitude default to the beacon position
+
 The plugin answers messages that start with ``chess``. No built-in aprsd
 plugin starts with "c", so they don't answer as well. On APRS-IS, the plugin
 adds a ``g/<callsign>`` filter so every message addressed to the server
@@ -102,6 +110,37 @@ With ``beacon_enabled = true`` the server sends a position report when it
 starts and every ``beacon_interval`` seconds after that, so it shows up on
 maps such as aprs.fi. Set ``[DEFAULT] enable_beacon = false`` as well;
 otherwise aprsd's built-in beacon, labeled "APRSD GPS Beacon", goes out too.
+
+Showing up on the map as CHESS
+------------------------------
+
+Some stations show on maps with names like WEATHER or EMAIL. **Don't log in
+or transmit as such a name.** Only licensed amateurs may send into APRS-IS,
+under their own callsign, and igates can put internet traffic on the air, so
+a packet sent *as* CHESS could go out over RF under a callsign that isn't
+licensed.
+
+The proper way is an **APRS object**: a position report *about* something,
+with a name of up to 9 characters. Your licensed station sends it and owns it,
+and the name is only a label on the map. With ``object_enabled = true`` the
+plugin sends::
+
+    KK6SPK-4>APZ100:;CHESS    *121739z3813.66N/08541.38WeAPRS Chess: msg KK6SPK-4 chess help
+
+* ``;CHESS`` plus padding is the object name, always 9 characters.
+* ``*`` means the object is live.
+* ``121739z`` is the time (day, hour, minute, UTC).
+* ``3813.66N/08541.38W`` is the position and ``e`` is the symbol (``/e`` is a horse).
+* The rest is the comment, which tells people who to message.
+
+aprs.fi shows it as **CHESS**, "object of KK6SPK-4". It's sent on the same
+schedule as the beacon. When the server shuts down cleanly it sends the
+object once more with ``_`` instead of ``*``, which removes it from maps.
+Objects can't receive messages, so players still message the station
+callsign; the comment says which one.
+
+To show only the CHESS marker, turn the station beacon off
+(``beacon_enabled = false``) and the object on.
 
 ``radio-service/aprsd-chess`` in the vinnward-cluster repository runs this
 plugin on k3s.

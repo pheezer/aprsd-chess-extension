@@ -115,15 +115,33 @@ class ChessPlugin(plugin.APRSDRegexCommandPluginBase):
         if not (self.enabled and self.server):
             return []
         created = [ChessExpiryThread(self.server)]
+        beacon_position = object_position = object_name = None
         if CONF.aprsd_chess.beacon_enabled:
-            position = beacon.beacon_settings()
-            if position:
-                created.append(beacon.ChessBeaconThread(*position))
-            else:
+            beacon_position = beacon.beacon_settings()
+            if not beacon_position:
                 LOG.warning(
                     "Chess: beacon_enabled but no position; set "
                     "[aprsd_chess] beacon_latitude and beacon_longitude"
                 )
+        if CONF.aprsd_chess.object_enabled:
+            try:
+                object_name = beacon.validate_object_name(CONF.aprsd_chess.object_name)
+            except ValueError as ex:
+                LOG.warning(f"Chess: not sending the map object: {ex}")
+            else:
+                if object_name.upper() == protocol.normalize_call(CONF.callsign):
+                    LOG.warning("Chess: the object name can't be the station callsign")
+                    object_name = None
+            object_position = beacon.object_settings() if object_name else None
+            if object_name and not object_position:
+                LOG.warning(
+                    "Chess: object_enabled but no position; set "
+                    "[aprsd_chess] object_latitude and object_longitude"
+                )
+        if beacon_position or object_position:
+            created.append(
+                beacon.ChessBeaconThread(beacon_position, object_position, object_name)
+            )
         return created
 
     def help(self):
